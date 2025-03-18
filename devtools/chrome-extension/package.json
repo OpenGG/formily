@@ -3,6 +3,16 @@
   "version": "3.0.0",
   "displayName": "Formily DevTools",
   "description": "Formily DevTools for debugging application's state changes.",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alibaba/formily.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alibaba/formily/issues"
+  },
+  "homepage": "https://github.com/alibaba/formily#readme",
   "scripts": {
     "cleanup": "rm -rf .plasmo build",
     "dev": "yarn run build:backend && yarn run cleanup && yarn run dev:plasmo",
@@ -13,9 +23,12 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "@formily/shared": "2.3.2",
     "plasmo": "0.90.3",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-json-view": "^1.19.1",
+    "react-treebeard": "^3.2.4"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",

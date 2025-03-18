@@ -1,0 +1,32 @@
+name: Release Devtools
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install # will run `yarn install` command
+          dir: devtools/chrome-extension
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v3.4.1
+        with:
+          node-version: 22.x
+      - name: Build the extension
+        run: yarn run build
+        working-directory: devtools/chrome-extension
+        env:
+          # avoid core dump, see: https://github.com/parcel-bundler/parcel/issues/10081
+          PARCEL_WORKER_BACKEND: process
+      - name: Package the extension into a zip artifact
+        run: yarn run package
+        working-directory: devtools/chrome-extension
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: formily-devtools
+          path: devtools/chrome-extension/build/chrome-mv3-prod.zip
