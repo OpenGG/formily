@@ -7,22 +7,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v3.4.1
+      - name: setup node
+        uses: actions/setup-node@v1
         with:
-          node-version: 20.x
+          node-version: 16
           registry-url: https://registry.npmjs.org/
-      - run: |
+          cache: yarn
+      - name: check env
+        run: |
           node --version
           yarn -v
-          yarn install
+      - name: install all deps
+        run: |
+          yarn install --ignore-engines
+      - name: build all packages
+        run: |
+          yarn build
         env:
           # avoid core dump, see: https://github.com/parcel-bundler/parcel/issues/10081
           PARCEL_WORKER_BACKEND: process
-      - name: Wait 1 hour
-        run: sleep 3600
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v4
         with:
