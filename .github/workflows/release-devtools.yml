@@ -2,7 +2,7 @@ name: Release Devtools
 on:
   workflow_dispatch:
     remote_debug:
-      description: 'Enable remote debug?'
+      description: 'Enable remote debug session?'
       type: boolean
       required: false
       default: false
@@ -10,48 +10,52 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      DEVTOOLS_ZIP_PATH: devtools/chrome-extension/build/chrome-mv3-prod.zip
+      DEVTOOLS_ARTIFACT_NAME: formily-devtools
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup upterm session (optional)
+      - name: Start debug session (when enabled)
+        if: ${{ inputs.remote_debug }}
         uses: lhotari/action-upterm@v1
-        if: ${{ github.event.inputs.remote_debug == true }}
 
-      - name: setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
           cache: yarn
 
-      - name: check env
+      - name: Verify environment
         run: |
           node --version
           yarn -v
 
-      - name: Wait 1 hour (optional)
+      - name: Maintain debug session (when enabled)
         run: |
           sleep 3600
-        if: ${{ github.event.inputs.remote_debug == true }}
+        if: ${{ inputs.remote_debug }}
 
-      - name: install all deps
+      - name: Install dependencies
         run: |
           yarn install --ignore-engines
 
-      - name: build all packages
+      - name: Build packages
         run: |
           yarn build
         env:
           # avoid core dump, see: https://github.com/parcel-bundler/parcel/issues/10081
           PARCEL_WORKER_BACKEND: process
 
-      - name: pack extension zip
-        run: |
-          cd devtools/chrome-extension
-          yarn package
+      - name: Validate artifact
+        run: test -f ${{ env.DEVTOOLS_ZIP_PATH }}
 
-      - name: 'Upload Artifact'
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: formily-devtools
-          path: devtools/chrome-extension/build/chrome-mv3-prod.zip
+          name: ${{ env.DEVTOOLS_ARTIFACT_NAME }}
+          path: ${{ env.DEVTOOLS_ZIP_PATH }}

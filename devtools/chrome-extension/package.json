@@ -19,7 +19,7 @@
     "dev:plasmo": "plasmo dev",
     "build": "yarn run build:backend && yarn run cleanup && yarn run build:plasmo",
     "build:backend": "tsc src/webAccessible/backend.ts --outFile assets/backend.js",
-    "build:plasmo": "plasmo build",
+    "build:plasmo": "plasmo build --zip",
     "package": "plasmo package"
   },
   "dependencies": {
