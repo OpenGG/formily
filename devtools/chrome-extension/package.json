@@ -1,8 +1,8 @@
 {
   "name": "@formily/chrome-extension",
   "version": "3.0.0",
-  "displayName": "Formily DevTools",
-  "description": "Formily DevTools for debugging application's state changes.",
+  "displayName": "Formily DevTools (v3)",
+  "description": "Formily DevTools (v3) for debugging application's state changes.",
   "private": true,
   "license": "MIT",
   "repository": {

@@ -36,6 +36,6 @@ const loadCheckInterval = setInterval(checkForFormilyPresence, 1000)
 
 checkForFormilyPresence()
 
-const IndexDevtools = () => <h2>Formily devtools is running</h2>
+const IndexDevtools = () => <h2>Formily DevTools (v3) is running</h2>
 
 export default IndexDevtools
