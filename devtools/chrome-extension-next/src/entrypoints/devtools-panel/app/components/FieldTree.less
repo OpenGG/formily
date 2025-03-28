@@ -1,0 +1,94 @@
+@treePrefixCls: ~'rc-tree';
+@treeNodePrefixCls: ~'@{treePrefixCls}-treenode';
+
+.@{treePrefixCls} {
+  margin: 0;
+  border: 1px solid transparent;
+  color: #9da5ab;
+
+  &-switcher {
+    flex: 0 0 auto;
+  }
+  &-title {
+    display: inline-block;
+  }
+  &-indent {
+    flex: 0 0 auto;
+    height: 0;
+    vertical-align: bottom;
+  }
+  &-indent-unit {
+    display: inline-block;
+    width: 16px;
+  }
+
+  &-node-content-wrapper {
+    position: relative;
+    height: 24px;
+    line-height: 24px;
+    flex: 1 0 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0 0 0 18px;
+    list-style: none;
+  }
+  &-switcher {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 8px;
+    margin-right: 6px;
+    cursor: pointer;
+    &:after {
+      content: ' ';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 6px solid #9da5ab;
+    }
+  }
+  &-switcher_open,
+  &-switcher_close {
+    &:after {
+      transform: rotate(0deg);
+      transform-origin: 50% 50%;
+      transition: 0.2s transform ease-in-out;
+    }
+  }
+  &-switcher_close {
+    &:after {
+      transform: rotate(-90deg);
+    }
+  }
+  &-switcher-noop {
+    cursor: default;
+    &:after {
+      border-top-color: transparent;
+    }
+  }
+}
+.@{treeNodePrefixCls} {
+  display: flex;
+  flex-flow: row nowrap;
+  padding: 0px 5px;
+
+  &-selected {
+    background-color: #3d424a;
+  }
+
+  &.filter-node {
+    color: #36d4c7;
+  }
+}
+
+.tree-node-label {
+  position: absolute;
+  right: 12px;
+  top: 0;
+}
