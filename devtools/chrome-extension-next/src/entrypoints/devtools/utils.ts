@@ -8,6 +8,3 @@ export const inspectedWindowEval = <T>(code: string) =>
       resolve(result)
     })
   })
-
-export const wait = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms))

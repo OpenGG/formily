@@ -2,47 +2,69 @@ import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import { App } from './app'
+import {
+  CHANNEL_DEVTOOLS_PANEL_TO_BACKGROUND,
+  FORMILY_DEV_TOOLS_INSPECT_HOOK,
+} from '@/constants'
+import { inspectedWindowEval } from '../devtools/utils'
 
-const backgroundPageConnection = chrome.runtime.connect({
-  name: '@formily-devtools-panel-script',
+const messageChannel = chrome.runtime.connect({
+  name: CHANNEL_DEVTOOLS_PANEL_TO_BACKGROUND,
 })
 
-backgroundPageConnection.postMessage({
+messageChannel.postMessage({
   name: 'init',
   tabId: chrome.devtools.inspectedWindow.tabId,
 })
-
-chrome.devtools.inspectedWindow.eval(
-  'window.__FORMILY_DEV_TOOLS_HOOK__.openDevtools()'
-)
 
 const Devtools = () => {
   const [state, setState] = useState<any[]>([])
   useEffect(() => {
     let store: Record<string, any> = {}
     const update = () => {
-      setState(
-        Object.keys(store).map((key) => {
-          return store[key]
-        }) as any[]
-      )
+      setState(Object.values(store))
     }
-    chrome.devtools.inspectedWindow.eval(
-      'window.__FORMILY_DEV_TOOLS_HOOK__.update()'
-    )
-    backgroundPageConnection.onMessage.addListener(({ type, id, graph }) => {
-      if (type === 'init') {
-        store = {}
-        chrome.devtools.inspectedWindow.eval(
-          'window.__FORMILY_DEV_TOOLS_HOOK__.openDevtools()'
-        )
-      } else if (type !== 'uninstall') {
-        store[id] = JSON.parse(graph)
-      } else {
-        delete store[id]
-      }
+
+    // Function to update all formily instances
+    const updateAllFormilyInstances = async () => {
+      await inspectedWindowEval(
+        `window.${FORMILY_DEV_TOOLS_INSPECT_HOOK}.openDevtools()`
+      )
+      const res = (await inspectedWindowEval(
+        `window.${FORMILY_DEV_TOOLS_INSPECT_HOOK}.getAllFormilyInstances()`
+      )) as Record<string, any>
+
+      store = res
       update()
+    }
+    const updateFormilyInstance = async (id: string) => {
+      const form = await inspectedWindowEval(
+        `window.${FORMILY_DEV_TOOLS_INSPECT_HOOK}.getFormilyInstance(${JSON.stringify(
+          id
+        )})`
+      )
+      store[id] = form
+      update()
+    }
+    messageChannel.onMessage.addListener(({ type, id }) => {
+      switch (type) {
+        case 'init':
+          updateAllFormilyInstances()
+          break
+        case 'install':
+        case 'update':
+          updateFormilyInstance(id)
+          break
+        case 'uninstall':
+          if (store[id]) {
+            delete store[id]
+            update()
+          }
+          break
+      }
     })
+
+    updateAllFormilyInstances()
   }, [])
   return <App forms={state} />
 }

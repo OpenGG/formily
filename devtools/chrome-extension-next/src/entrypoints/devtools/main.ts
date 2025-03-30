@@ -1,4 +1,6 @@
-import { inspectedWindowEval, wait } from './utils'
+import { wait } from '@/utils/wait'
+import { inspectedWindowEval } from './utils'
+import { FORMILY_DEV_TOOLS_INSPECT_HOOK } from '@/constants'
 
 const createPanel = () => {
   browser.devtools.panels.create(
@@ -23,7 +25,7 @@ const startCheckFormilyPresence = async () => {
     try {
       // Evaluate a script in the inspected window to check for Formily instance
       const hasFormily = await inspectedWindowEval(
-        'window.__FORMILY_DEV_TOOLS_HOOK__ && window.__FORMILY_DEV_TOOLS_HOOK__.hasFormilyInstance'
+        `window.${FORMILY_DEV_TOOLS_INSPECT_HOOK} && window.${FORMILY_DEV_TOOLS_INSPECT_HOOK}.hasFormilyInstance()`
       )
 
       // If Formily instance is found, break the loop

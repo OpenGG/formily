@@ -1,3 +1,7 @@
+html {
+  background: #282c34;
+}
+
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -26,7 +30,6 @@
   right: 0;
   overflow: hidden;
   color: #36d4c7;
-  background: #282c34;
 }
 
 .fieldTree {

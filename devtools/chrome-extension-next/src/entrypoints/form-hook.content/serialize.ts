@@ -1,18 +1,24 @@
-export const serialize = (obj: any, seen = new WeakMap()) => {
+export const serialize = (obj: any, seen = new WeakMap()): any => {
+  const type = typeof obj
+  // function
+  if (type === 'function') {
+    seen.set(obj, true)
+    return `f ${obj.displayName || obj.name}(){ }`
+  }
+
+  // symbol
+  if (type === 'symbol') {
+    return obj.toString()
+  }
+
   // basic types
-  if (typeof obj !== 'object' || !obj) {
+  if (type !== 'object' || !obj) {
     return obj
   }
 
   // circular reference
   if (seen.has(obj)) {
     return '#CircularReference'
-  }
-
-  // function
-  if (typeof obj === 'function') {
-    seen.set(obj, true)
-    return `f ${obj.displayName || obj.name}(){ }`
   }
 
   // array
@@ -28,15 +34,15 @@ export const serialize = (obj: any, seen = new WeakMap()) => {
   }
 
   // has toJS()
-  if (typeof obj.toJS !== 'undefined') {
+  if (typeof obj.toJS === 'function') {
     seen.set(obj, true)
-    return obj.toJS()
+    return serialize(obj.toJS(), seen)
   }
 
   // has toJSON()
-  if (obj.toJSON) {
+  if (typeof obj.toJSON === 'function') {
     seen.set(obj, true)
-    return obj.toJSON()
+    return serialize(obj.toJSON(), seen)
   }
 
   // iterate over object properties

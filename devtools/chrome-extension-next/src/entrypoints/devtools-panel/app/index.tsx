@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { LeftPanel } from './components/LeftPanel'
 import { RightPanel } from './components/RightPanel'
+import { inspectedWindowEval } from '@/entrypoints/devtools/utils'
 
 export const App = ({ forms }: { forms: any }) => {
   const [selected, setSelected] = useState({
@@ -14,13 +15,11 @@ export const App = ({ forms }: { forms: any }) => {
         forms={forms}
         onSelect={(info: any) => {
           setSelected(info)
-          if (chrome && chrome.devtools && chrome.devtools.inspectedWindow) {
-            chrome.devtools.inspectedWindow.eval(
-              `window.__FORMILY_DEV_TOOLS_HOOK__.setVm("${info.key}","${
-                forms[info.current][''].id
-              }")`
-            )
-          }
+          inspectedWindowEval(
+            `window.__FORMILY_DEV_TOOLS_HOOK__.setVm("${info.key}","${
+              forms[info.current][''].id
+            }")`
+          )
         }}
       />
       <RightPanel

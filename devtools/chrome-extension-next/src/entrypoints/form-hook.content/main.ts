@@ -1,29 +1,17 @@
 import { valueType } from '@/utils/valueType'
 import { serialize } from './serialize'
 import type { Form } from '@formily/core'
-const send = ({
-  type,
-  id,
-  form,
-}: {
-  type: string
-  id?: string | number
-  form?: Form
-}) => {
-  const graph = serialize(form?.getFormGraph())
+import {
+  FORMILY_DEV_TOOLS_INSPECT_HOOK,
+  SOURCE_FORM_HOOK_CONTENT,
+} from '@/constants'
+
+const send = ({ type, id }: { type: string; id?: string | number }) => {
   window.postMessage(
     {
-      source: '@formily-devtools-inject-script',
+      source: SOURCE_FORM_HOOK_CONTENT,
       type,
       id,
-      graph:
-        form &&
-        JSON.stringify(graph, (key, value) => {
-          if (typeof value === 'symbol') {
-            return value.toString()
-          }
-          return value
-        }),
     },
     '*'
   )
@@ -31,15 +19,33 @@ const send = ({
 
 const globalScope = globalThis as any
 
-const HOOK = {
+const state = {
   hasFormilyInstance: false,
   hasOpenDevtools: false,
   store: valueType<Record<string, Form>>({}),
+}
+
+const devtoolsInspectHook = {
   openDevtools() {
-    this.hasOpenDevtools = true
+    state.hasOpenDevtools = true
   },
   closeDevtools() {
-    this.hasOpenDevtools = false
+    state.hasOpenDevtools = false
+  },
+  hasFormilyInstance() {
+    return state.hasFormilyInstance
+  },
+  getAllFormilyInstances() {
+    const serializedStore: Record<string, any> = {}
+    Object.keys(state.store).forEach((key) => {
+      const form = state.store[key]
+      serializedStore[key] = serialize(form.getFormGraph())
+    })
+    return serializedStore
+  },
+  getFormilyInstance(key: string) {
+    const form = state.store[key]
+    return serialize(form?.getFormGraph())
   },
   /**
    * When user selects a field/form in dev tool's left panel tree, set global
@@ -52,12 +58,15 @@ const HOOK = {
   setVm(fieldId: string, formId: string) {
     if (fieldId) {
       // If fieldId exists, set $vm to the instance of the corresponding field
-      globalScope.$vm = this.store[formId].fields[fieldId]
+      globalScope.$vm = state.store[formId].fields[fieldId]
     } else {
       // If the fieldId does not exist, set $vm to the instance of the entire form
-      globalScope.$vm = this.store[formId]
+      globalScope.$vm = state.store[formId]
     }
   },
+}
+
+const formilyCoreHook = {
   /**
    * This method is called by the following file:
    * packages/core/src/models/Form.ts
@@ -69,12 +78,11 @@ const HOOK = {
    * @param form - The form instance.
    */
   inject(id: Form['id'], form: Form) {
-    this.hasFormilyInstance = true
-    this.store[id] = form
+    state.hasFormilyInstance = true
+    state.store[id] = form
     send({
       type: 'install',
       id,
-      form,
     })
     let timer: ReturnType<typeof setTimeout> | null = null
     const idleCallback = (deadline: IdleDeadline) => {
@@ -84,7 +92,7 @@ const HOOK = {
         return
       }
 
-      const registered = this.store[id]
+      const registered = state.store[id]
 
       if (!registered) {
         return
@@ -93,7 +101,6 @@ const HOOK = {
       send({
         type: 'update',
         id,
-        form,
       })
     }
     const emit = () => {
@@ -101,7 +108,7 @@ const HOOK = {
     }
 
     form.subscribe(() => {
-      if (!this.hasOpenDevtools) {
+      if (!state.hasOpenDevtools) {
         return
       }
       if (timer !== null) {
@@ -110,21 +117,7 @@ const HOOK = {
       timer = setTimeout(emit, 300)
     })
   },
-  /**
-   * This method is called by the following file:
-   * devtools/index.ts
-   * Get the latest value during initialization.
-   */
-  update() {
-    const keys = Object.keys(this.store || {})
-    keys.forEach((id) => {
-      send({
-        type: 'update',
-        id,
-        form: this.store[id],
-      })
-    })
-  },
+
   /**
    * This method is called by the following file:
    * packages/core/src/models/Form.ts
@@ -135,7 +128,7 @@ const HOOK = {
    * @param id - The unique identifier of the form.
    */
   unmount(id: Form['id']) {
-    delete this.store[id]
+    delete state.store[id]
     send({
       type: 'uninstall',
       id,
@@ -144,9 +137,12 @@ const HOOK = {
 }
 
 export const backendMain = () => {
-  // Register to the global variable, called by both formily/core and devtools
-  globalScope.__FORMILY_DEV_TOOLS_HOOK__ = HOOK
-  globalScope.__UFORM_DEV_TOOLS_HOOK__ = HOOK
+  // Register to the global variable, called by both formily/core
+  globalScope.__FORMILY_DEV_TOOLS_HOOK__ = formilyCoreHook
+  globalScope.__UFORM_DEV_TOOLS_HOOK__ = formilyCoreHook
+
+  // Register to the global variable, called by devtools
+  globalScope[FORMILY_DEV_TOOLS_INSPECT_HOOK] = devtoolsInspectHook
 
   send({
     type: 'init',
