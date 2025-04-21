@@ -25,8 +25,8 @@ const Devtools = () => {
       setState(Object.values(store))
     }
 
-    // Function to update all formily instances
-    const updateAllFormilyInstances = async () => {
+    // Pull formily states to store
+    const pullAllFormilyInstances = async () => {
       await inspectedWindowEval(
         `window.${FORMILY_DEV_TOOLS_INSPECT_HOOK}.openDevtools()`
       )
@@ -37,7 +37,7 @@ const Devtools = () => {
       store = res
       update()
     }
-    const updateFormilyInstance = async (id: string) => {
+    const pullFormilyInstance = async (id: string) => {
       const form = await inspectedWindowEval(
         `window.${FORMILY_DEV_TOOLS_INSPECT_HOOK}.getFormilyInstance(${JSON.stringify(
           id
@@ -49,11 +49,11 @@ const Devtools = () => {
     messageChannel.onMessage.addListener(({ type, id }) => {
       switch (type) {
         case 'init':
-          updateAllFormilyInstances()
+          pullAllFormilyInstances()
           break
         case 'install':
         case 'update':
-          updateFormilyInstance(id)
+          pullFormilyInstance(id)
           break
         case 'uninstall':
           if (store[id]) {
@@ -64,7 +64,7 @@ const Devtools = () => {
       }
     })
 
-    updateAllFormilyInstances()
+    pullAllFormilyInstances()
   }, [])
   return <App forms={state} />
 }
