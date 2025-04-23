@@ -1,21 +1,18 @@
-import { toArr } from '@formily/shared'
 import React from 'react'
 
 export const Tabs = ({ dataSource, current, onChange }) => {
-  current = current || 0
   return (
     <div className="tabs">
-      {toArr(dataSource).map((item, index) => {
+      {dataSource.map((item, index) => {
         return (
           <div
-            className={`tabItem ${current == index ? 'active' : ''}`}
+            className={`tabItem ${current == item[''].id ? 'active' : ''}`}
             key={index}
             onClick={() => {
               if (onChange) {
-                onChange(index)
+                onChange(item[''].id)
               }
-            }}
-          >
+            }}>
             <span>Form#{index + 1}</span>
           </div>
         )

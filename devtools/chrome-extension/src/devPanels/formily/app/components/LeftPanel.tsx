@@ -1,32 +1,25 @@
-import React, { useState } from 'react'
+import React from 'react'
 
+import { useModel } from '../models/helpers'
+import { selectModel } from '../models/selectModel'
 import { FieldTree } from './FieldTree'
 import { Tabs } from './Tabs'
 
-export const LeftPanel = ({ dataSource, onSelect }) => {
-  const [current, setCurrent] = useState(0)
+export const LeftPanel = ({ dataSource }) => {
+  const { state, actions } = useModel(selectModel)
   return (
     <div className="leftPanel">
       <Tabs
         dataSource={dataSource}
-        current={current}
-        onChange={(index) => {
-          setCurrent(index)
-          onSelect({
-            current: index,
-            key: '',
-          })
+        current={state.rootId}
+        onChange={(id) => {
+          actions.selectRootId(id)
         }}
       />
       <FieldTree
-        dataSource={dataSource[current]}
+        dataSource={dataSource.find((item) => item[''].id === state.rootId)}
         onSelect={(node) => {
-          if (onSelect) {
-            onSelect({
-              current,
-              key: node.path,
-            })
-          }
+          actions.selectKey(node.path)
         }}
       />
     </div>

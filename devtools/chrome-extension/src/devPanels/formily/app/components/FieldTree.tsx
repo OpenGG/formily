@@ -2,6 +2,8 @@ import { FormPath, isObj } from '@formily/shared'
 import React, { useEffect, useRef, useState } from 'react'
 import { decorators, Treebeard } from 'react-treebeard'
 
+import { clearNullableTimeout, type Timeout } from '~utils/timers'
+
 import * as filters from './filter'
 import SearchBox from './SearchBox'
 
@@ -59,7 +61,7 @@ const createTree = (dataSource: any, cursor?: any) => {
       const parent = findParent(key)
       if (parent) {
         node.name = (node.path || '').slice(
-          parent && parent.path ? parent.path.length + 1 : 0
+          parent && parent.path ? parent.path.length + 1 : 0,
         )
         parent.children = parent.children || []
         parent.children.push(node)
@@ -163,22 +165,19 @@ const Header = (props) => {
       style={style.base}
       onClick={() => {
         node.toggled = false
-      }}
-    >
+      }}>
       <div
         style={
           node.selected
             ? { ...style.title, ...customStyles.header.title }
             : style.title
-        }
-      >
+        }>
         <span
           style={{
             zIndex: 1,
             position: 'relative',
             fontSize: 12,
-          }}
-        >
+          }}>
           {node.name}
         </span>
         <span style={{ zIndex: 1, position: 'absolute', right: 12 }}>
@@ -186,8 +185,7 @@ const Header = (props) => {
         </span>
         <div
           className={`fieldTreeHighlight ${node.active ? 'active' : ''}`}
-          style={{ transition: '.15s all ease-in' }}
-        ></div>
+          style={{ transition: '.15s all ease-in' }}></div>
       </div>
     </div>
   )
@@ -201,7 +199,7 @@ export const FieldTree = ({ dataSource, onSelect }) => {
   const allDataRef = useRef(createTree(dataSource))
   const cursor = useRef(allDataRef.current)
   const [keyword, setKeyword] = useState('')
-  const searchTimer = useRef(null)
+  const searchTimer = useRef<Timeout | null>(null)
   const [data, setData] = useState(allDataRef.current)
 
   const filterData = () => {
@@ -224,7 +222,7 @@ export const FieldTree = ({ dataSource, onSelect }) => {
   }
 
   const onSearch = ({ target: { value } }) => {
-    clearTimeout(searchTimer.current)
+    clearNullableTimeout(searchTimer.current)
     searchTimer.current = setTimeout(() => {
       setKeyword(value.trim())
     }, 100)

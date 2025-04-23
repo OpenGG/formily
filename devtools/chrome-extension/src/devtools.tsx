@@ -4,8 +4,8 @@ import formilyDevPanel from 'url:./devPanels/formily/index.html'
 const createPanel = () => {
   chrome.devtools.panels.create(
     '🍀Formily',
-    null,
-    formilyDevPanel.split('/').pop()
+    '',
+    formilyDevPanel.replace(/.*\//, ''),
   )
 }
 
@@ -28,7 +28,7 @@ const checkForFormilyPresence = () => {
       clearInterval(loadCheckInterval)
 
       createPanel()
-    }
+    },
   )
 }
 

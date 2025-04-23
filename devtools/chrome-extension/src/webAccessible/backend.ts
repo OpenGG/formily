@@ -1,5 +1,4 @@
 //inject content script
-
 const serializeObject = (obj: any) => {
   const seens = new WeakMap()
   const serialize = (obj: any) => {
@@ -58,13 +57,9 @@ const send = ({
           return value
         }),
     },
-    '*'
+    '*',
   )
 }
-
-send({
-  type: 'init',
-})
 
 interface IIdleDeadline {
   didTimeout: boolean
@@ -76,6 +71,9 @@ const HOOK = {
   hasOpenDevtools: false,
   store: {},
   openDevtools() {
+    send({
+      type: 'init',
+    })
     this.hasOpenDevtools = true
   },
   closeDevtools() {
@@ -91,12 +89,7 @@ const HOOK = {
   inject(id: number, form: any) {
     this.hasFormilyInstance = true
     this.store[id] = form
-    send({
-      type: 'install',
-      id,
-      form,
-    })
-    let timer = null
+    let timer: any = null
     const idleCallback = (deadline: IIdleDeadline) => {
       const busy = deadline.timeRemaining() === 0
       if (busy) {
@@ -120,13 +113,17 @@ const HOOK = {
       globalThis.requestIdleCallback(idleCallback)
     }
 
-    form.subscribe(() => {
+    const onChanged = () => {
       if (!this.hasOpenDevtools) return
       clearTimeout(timer)
       timer = setTimeout(emit, 300)
-    })
+    }
+    form.subscribe(onChanged)
+
+    onChanged()
   },
   update() {
+    if (!this.hasOpenDevtools) return
     const keys = Object.keys(this.store || {})
     keys.forEach((id) => {
       send({
@@ -137,6 +134,7 @@ const HOOK = {
     })
   },
   unmount(id: number) {
+    if (!this.hasOpenDevtools) return
     delete this.store[id]
     send({
       type: 'uninstall',
