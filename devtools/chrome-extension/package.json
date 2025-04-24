@@ -1,6 +1,6 @@
 {
   "name": "@formily/chrome-extension",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "displayName": "Formily DevTools (v3)",
   "description": "Formily DevTools (v3) for debugging application's state changes.",
   "private": true,
