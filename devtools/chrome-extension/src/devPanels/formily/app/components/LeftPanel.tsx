@@ -5,19 +5,17 @@ import { selectModel } from '../models/selectModel'
 import { FieldTree } from './FieldTree'
 import { Tabs } from './Tabs'
 
-export const LeftPanel = ({ dataSource }) => {
-  const { state, actions } = useModel(selectModel)
+export const LeftPanel = () => {
+  const { actions } = useModel(selectModel)
   return (
     <div className="leftPanel">
       <Tabs
-        dataSource={dataSource}
-        current={state.rootId}
         onChange={(id) => {
           actions.selectRootId(id)
+          actions.selectKey('')
         }}
       />
       <FieldTree
-        dataSource={dataSource.find((item) => item[''].id === state.rootId)}
         onSelect={(node) => {
           actions.selectKey(node.path)
         }}

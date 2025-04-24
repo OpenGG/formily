@@ -103,7 +103,11 @@ class Channel {
     this.keepAliveStrategy.stop()
     this.port.onMessage.removeListener(this.handleMessage)
     this.port.onDisconnect.removeListener(this.handleDisconnect)
-    this.port.disconnect()
+    try {
+      this.port.disconnect()
+    } catch (e) {
+      error('Channel:disconnect error', e)
+    }
   }
 
   sendMessage(message: any) {

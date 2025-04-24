@@ -1,9 +1,9 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
 
 import { App } from './index'
+import { dataSourceModel } from './models/dataSourceModel'
 
-const dataSource = [
+const dataSource: any = [
   {
     '': {
       pristine: false,
@@ -1824,7 +1824,13 @@ const dataSource = [
   },
 ]
 
-ReactDOM.render(
-  <App dataSource={dataSource} />,
-  document.getElementById('root')
-)
+dataSource.forEach((item, index) => {
+  item[''].id = `test:${index}`
+  dataSourceModel.actions.set(item[''].id, item)
+})
+
+dataSourceModel.actions.forceSync()
+
+export const Demo = () => {
+  return <App />
+}

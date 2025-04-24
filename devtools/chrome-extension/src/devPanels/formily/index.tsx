@@ -6,7 +6,6 @@ import { warn } from '~utils/logger'
 
 import { App } from './app'
 import { dataSourceModel } from './app/models/dataSourceModel'
-import { useModel } from './app/models/helpers'
 
 const channel = new Channel({
   name: '@formily-devtools-panel-script',
@@ -36,14 +35,12 @@ chrome.devtools.inspectedWindow.eval(
 )
 
 const Devtools = () => {
-  const { state } = useModel(dataSourceModel)
-  const dataSource = [...state.values()]
   useEffect(() => {
     chrome.devtools.inspectedWindow.eval(
       'window.__FORMILY_DEV_TOOLS_HOOK__.update()',
     )
   }, [])
-  return <App dataSource={dataSource} />
+  return <App />
 }
 
 const rootElement = document.getElementById('root')

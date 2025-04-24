@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { LeftPanel } from './components/LeftPanel'
 import { RightPanel } from './components/RightPanel'
-import { subscribeModel, useModel } from './models/helpers'
+import { useSelected } from './hooks/useSelected'
+import { subscribeModel } from './models/helpers'
 import { selectModel } from './models/selectModel'
 
 const select = (key: string, rootId: string) => {
@@ -17,25 +18,11 @@ subscribeModel(selectModel, (state) => {
   select(state.key, state.rootId)
 })
 
-export const App = ({ dataSource }) => {
-  const { state, actions } = useModel(selectModel)
-
-  const selectedDataSource = dataSource.find(
-    (item) => item[''].id === state.rootId,
-  )
-
-  useEffect(() => {
-    if (!selectedDataSource && dataSource.length > 0) {
-      actions.selectRootId(dataSource[0][''].id)
-    }
-  }, [state.rootId, dataSource, selectedDataSource])
-
-  const inspectedNode = selectedDataSource?.[state.key]
-
+export const App = () => {
   return (
     <div className="app">
-      <LeftPanel dataSource={dataSource} />
-      <RightPanel dataSource={inspectedNode || {}} />
+      <LeftPanel />
+      <RightPanel />
     </div>
   )
 }

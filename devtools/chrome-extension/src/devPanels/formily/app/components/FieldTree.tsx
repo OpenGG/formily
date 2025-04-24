@@ -4,6 +4,7 @@ import { decorators, Treebeard } from 'react-treebeard'
 
 import { clearNullableTimeout, type Timeout } from '~utils/timers'
 
+import { useSelected } from '../hooks/useSelected'
 import * as filters from './filter'
 import SearchBox from './SearchBox'
 
@@ -195,7 +196,7 @@ const ToolBar = ({ children }) => {
   return <div className="fieldTreeToolBar">{children}</div>
 }
 
-export const FieldTree = ({ dataSource, onSelect }) => {
+const FieldTreeComp = ({ rootId, dataSource, onSelect }) => {
   const allDataRef = useRef(createTree(dataSource))
   const cursor = useRef(allDataRef.current)
   const [keyword, setKeyword] = useState('')
@@ -240,6 +241,7 @@ export const FieldTree = ({ dataSource, onSelect }) => {
       </ToolBar>
 
       <Treebeard
+        key={rootId}
         data={filterData()}
         onToggle={onToggle}
         decorators={{
@@ -249,5 +251,17 @@ export const FieldTree = ({ dataSource, onSelect }) => {
         style={theme}
       />
     </div>
+  )
+}
+
+export const FieldTree = ({ onSelect }) => {
+  const { rootId, root: dataSource } = useSelected()
+
+  return (
+    <FieldTreeComp
+      rootId={rootId}
+      dataSource={dataSource}
+      onSelect={onSelect}
+    />
   )
 }

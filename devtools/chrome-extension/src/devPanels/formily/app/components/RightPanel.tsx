@@ -1,12 +1,16 @@
 import React from 'react'
 import ReactJson from 'react-json-view'
 
-export const RightPanel = ({ dataSource }) => {
+import { useSelected } from '../hooks/useSelected'
+
+export const RightPanel = () => {
+  const { inspected } = useSelected()
+
   return (
     <div className="rightPanel">
       <ReactJson
-        src={dataSource}
-        name={dataSource && dataSource.displayName}
+        src={inspected}
+        name={inspected && inspected.displayName}
         theme="hopscotch"
         displayDataTypes={false}
         enableClipboard={false}
